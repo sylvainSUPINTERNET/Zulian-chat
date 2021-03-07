@@ -28,12 +28,16 @@ app.use(cors());
 io.on('connection', async socket => {
     const { id, rooms } = socket;
 
-
-
     socket.on("join", userDetailsAndRoom => {
+        console.log("RCEIVED JOIN : ", userDetailsAndRoom);
+
         const { roomName, userName } = userDetailsAndRoom;
+
         socket.join(roomName);
+        console.log("JOIN OK");
         io.in(roomName).emit(`welcome-user`, `Hello ${userName} !`);
+        console.log("EMIT EVENT OK");
+        console.log("Current socket rooms : ", socket.rooms);
     })
 
     // By default, user joins a room ( allow you to send a personnal message on this one)
@@ -44,8 +48,6 @@ io.on('connection', async socket => {
         console.log(socket.rooms); // the Set contains at least the socket ID
         console.log('disconnecting')
     });
-
-
 
     io.on('disconnect', reason => {
         console.log(socket.rooms.size)
