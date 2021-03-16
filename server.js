@@ -29,21 +29,18 @@ io.on('connection', async socket => {
     const { id, rooms } = socket;
 
     socket.on("join", userDetailsAndRoom => {
-        console.log("RCEIVED JOIN : ", userDetailsAndRoom);
-
-        const { roomName, userName } = userDetailsAndRoom;
-
-        socket.join(roomName);
-        console.log("JOIN OK");
-        io.in(roomName).emit(`welcome-user`, `Hello ${userName} !`);
-        console.log("EMIT EVENT OK");
-        console.log("Current socket rooms : ", socket.rooms);
-    })
+        if ( userDetailsAndRoom.isLoadingRooms === true ) {
+            const {roomName, userName, userFirstname, userFullName, userUuid} = userDetailsAndRoom;
+            // TODO
+            console.log(`TODO : user ${userUuid} (${userFullName}) loading his room : ${roomName}`);
+            io.in(roomName).emit("connectedUser", `${userFirstname} is connected !`);
+        } else {
+            const { roomName, targetProfile, initiator } = userDetailsAndRoom;
+            io.in(roomName).emit("welcomeUser", `Invit conversation for ${targetProfile.user.uuid} by ${initiator.uuid}`);
+        }
+    });
 
     // By default, user joins a room ( allow you to send a personnal message on this one)
-    console.log("New users");
-    console.log(rooms);
-
     socket.on('disconnecting', () => {
         console.log(socket.rooms); // the Set contains at least the socket ID
         console.log('disconnecting')
