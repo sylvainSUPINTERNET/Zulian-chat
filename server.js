@@ -30,12 +30,23 @@ io.on('connection', async socket => {
 
     socket.on("join", userDetailsAndRoom => {
         if ( userDetailsAndRoom.isLoadingRooms === true ) {
-            const {roomName, userName, userFirstname, userFullName, userUuid} = userDetailsAndRoom;
-            // TODO
-            console.log(`TODO : user ${userUuid} (${userFullName}) loading his room : ${roomName}`);
-            io.in(roomName).emit("connectedUser", `${userFirstname} is connected !`);
+            const {roomName, userName, userFirstname, userFullName, userUuid} = userDetailsAndRoom; // roomName = uuid
+            console.log(`user ${userUuid} (${userFullName}) loading / connecting to his room : ${roomName}`);
+
+            socket.join(roomName)
+            io.in(roomName).emit(`${roomName}-connectedUser`, `${userFirstname} is connected !`);
+
+
+            setInterval(() => {
+                console.log("TEST SEND")
+                io.in(roomName).emit(`${roomName}-connectedUser`,"test");
+                console.log(io.sockets.adapter.rooms.get(roomName))
+
+            },6000)
+
         } else {
             const { roomName, targetProfile, initiator } = userDetailsAndRoom;
+            socket.join(roomName)
             io.in(roomName).emit("welcomeUser", `Invit conversation for ${targetProfile.user.uuid} by ${initiator.uuid}`);
         }
     });
