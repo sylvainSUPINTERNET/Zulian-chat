@@ -38,7 +38,7 @@ io.on('connection', async socket => {
 
 
             setInterval(() => {
-                console.log("TEST SEND")
+                    console.log("TEST SEND")
                 io.in(roomName).emit(`${roomName}-connectedUser`,"test");
                 console.log(io.sockets.adapter.rooms.get(roomName))
 
@@ -50,6 +50,26 @@ io.on('connection', async socket => {
             io.in(roomName).emit("welcomeUser", `Invit conversation for ${targetProfile.user.uuid} by ${initiator.uuid}`);
         }
     });
+
+
+    // Stream - webRTC
+    socket.on('newOffer', offer => {
+        console.log("Create new offer !")
+        console.log("emit new offer to everyone, except sender")
+        // sending to everyone except the client
+        socket.broadcast.emit("offerToAnswer", offer);
+    })
+
+    socket.on('newAnswer', answer => {
+        console.log("new answer incomming");
+        console.log("emit new answer to everyone, except sender")
+        socket.broadcast.emit("answerToOffer", {answer});
+    })
+
+    socket.on('candidate', candidate => {
+        console.log("New canddiate");
+        socket.emit("addCandidate", candidate);
+    })
 
     // By default, user joins a room ( allow you to send a personnal message on this one)
     socket.on('disconnecting', () => {
